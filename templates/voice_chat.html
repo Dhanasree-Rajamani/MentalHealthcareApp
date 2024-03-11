@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Voice Chat with AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-button">Back</a>
+        <div id="voice-chat-container">
+            <label for="voiceGender">Assistant voice:</label>
+            <select id="voiceGender">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+            <button id="start-voice">Start Voice Chat</button>
+            <div id="ai-avatar"></div>
+            <div id="transcript"></div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='voice_script.js') }}"></script>
+</body>
+</html>

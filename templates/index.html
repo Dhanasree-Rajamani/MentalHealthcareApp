@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Healthcare Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>CareTalk AI</h1>
+        <h2>Your AI Mental Healthcare Assistant!</h2>
+        <div class="button-container">
+            <a href="#" id="open-chat" class="button">Text Message</a>
+            <br><br><br>
+            <!-- Updated to use JavaScript for opening the voice chat modal -->
+            <a href="#" id="open-voice-chat" class="button">Voice Message</a>
+        </div>
+    </div>
+
+    <!-- Text Chat Modal -->
+    <div id="chat-modal" class="modal" style="display:none;">
+        <div id="chat-container">
+            <div id="chat-header">
+                <span>Text chat with Mental Healthcare Assistant</span>
+                <button id="close-chat">X</button>
+            </div>
+            <div id="chat-box"></div>
+            <div class="feedback-buttons">
+                <button class="upvote">👍</button>
+                <button class="downvote">👎</button>
+                <br><br>
+                <div id="chat-actions">
+                    <button id="download-chat">Download Chat Summary</button>
+                    <form id="emailForm">
+                        <input type="email" id="email-input" name="email" placeholder="Enter your email" />
+                        <button id="email-chat" type="submit">Email Chat Conversation</button>
+                    </form>
+                </div>
+            </div>
+            <div id="chat-input">
+                <input type="text" id="user-input" placeholder="Type your message here...">
+                <button id="send-btn">Send</button>
+            </div>                        
+        </div>
+    </div>
+
+    <!-- Voice Chat Modal -->
+    <div id="voice-chat-modal" class="modal" style="display:none;">
+        <div id="voice-chat-container">
+            <div id="voice-chat-header">
+                <span>Voice chat with Mental Healthcare Assistant</span>
+                <button id="close-voice-chat">X</button>
+            </div>
+            <div id="voice-controls">
+                <label for="voice-select">Choose AI Voice Gender:</label>
+                <select id="voice-gender-select">
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+                <button id="record-voice">Record Voice</button>
+            </div>
+            <div id="transcript">
+            <div id="voice-avatar-container">
+                <img id="voice-avatar" src='/static/man-avatar.png' alt="AI Avatar" />
+                <div id="mouth-overlay"></div>
+            </div>
+            <div class="feedback-buttons">
+                <button class="upvote">👍</button>
+                <button class="downvote">👎</button>
+            <br><br>
+            <div id="chat-actions">
+                <button id="download-voice-chat">Download Chat Summary</button>
+                <form id="emailFormVoice">
+                    <input type="email" id="email-input" name="email" placeholder="Enter your email" />
+                    <button id="email-chat" type="submit">Email Chat Conversation</button>
+                </form>
+            </div>                        
+            </div>
+            
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
