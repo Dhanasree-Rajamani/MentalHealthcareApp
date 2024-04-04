@@ -1,8 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const chatModal = document.getElementById('chat-modal');
-    const chatHistModal = document.getElementById('chat-history-modal')
     const closeButton = document.getElementById('close-chat');
-    const closeHistoryButton = document.getElementById('close-chat-history');
     const sendButton = document.getElementById('send-btn');
     const userInput = document.getElementById('user-input');
     const chatBox = document.getElementById('chat-box');
@@ -45,52 +43,6 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => console.error('Error sending email:', error));
     }
     
-    // Open text chat modal
-    document.getElementById('view-past-chats').addEventListener('click', function(event) {
-        event.preventDefault();
-        chatHistModal.style.display = 'block';
-        fetchChatHistory();
-    });
-    
-    function fetchChatHistory() {
-        const email = getLoggedInUserEmail(); // Assuming you have this function from your initial code
-        fetch(`/get_chats_for_user`)
-        .then(response => response.json())
-        .then(data => {
-            console.log(data);
-            populateChatList(data);
-        })
-        .catch(error => console.error('Error:', error));
-    }
-
-    function populateChatList(chats) {
-        const chatList = document.getElementById('chat-list');
-        chatList.innerHTML = ''; // Clear existing chat history
-    
-        chats.forEach((chat, index) => {
-            const chatDiv = document.createElement('div');
-            chatDiv.classList.add('chat-session');
-            chatDiv.setAttribute('data-index', index); // Set a data attribute to identify the chat
-    
-            const previewLength = 50;
-            let chatPreview = chat.length > previewLength ? chat.substring(0, previewLength) + "..." : chat;
-            chatDiv.innerHTML = chatPreview.replace(/\n/g, '<br>');
-    
-            chatDiv.addEventListener('click', () => displayFullChat(chat)); // Add click event to display full chat
-    
-            chatList.appendChild(chatDiv);
-        });
-    }
-    
-    function displayFullChat(chatContent) {
-        const chatDisplay = document.getElementById('chat-conversation');
-        chatDisplay.innerHTML = chatContent.replace(/\n/g, '<br>'); // Replace line breaks with HTML for display
-    }
-
-    closeHistoryButton.addEventListener('click', function() {
-        chatHistModal.style.display = 'none';
-    });
-    
     
     // Open text chat modal
     document.getElementById('open-chat').addEventListener('click', function(event) {
@@ -101,29 +53,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Close text chat modal
     closeButton.addEventListener('click', function() {
+        chatModal.style.display = 'none';
+
         // Confirm with the user
         var userWantsToSave = confirm("Do you want to save your chat before closing?");
-
-        if (userWantsToSave) {            
-            fetch('/save', {
-                method: 'POST', // or 'PUT'
-                // headers: {
-                //     'Content-Type': 'application/json',
-                // },
-                // body: JSON.stringify(chatData),
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-                chatModal.style.display = 'none';
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
-        } else {
-            // User does not want to save the chat or canceled the dialog
-            chatModal.style.display = 'none';
-        }
     });
 
     sendButton.addEventListener('click', function() {

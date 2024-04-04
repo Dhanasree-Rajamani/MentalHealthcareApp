@@ -53,6 +53,29 @@ h1 {
     z-index: 1000; /* Ensure modal is above other content */
 }
 
+#chat-history-modal {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Dimmed background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure modal is above other content */
+}
+
+#chat-history-container{
+    width: 100%; /* Further increased width */
+    height: 100%; /* Further increased height */
+    border-radius: 2px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    align-self: center;
+    margin-top: 7%;
+    margin-left: 10%;
+}
+
 #chat-container {
     width: 95%; /* Further increased width */
     max-width: 95%; /* Adjusted to ensure it doesn't exceed the viewport width */
@@ -244,6 +267,85 @@ h1 {
     background-color: #f7f7f7;
 }
 
+.login-container {
+    position: fixed;
+    right: 20px;
+    top: 20px;
+}
 
+.google-login-btn {
+    background-color: #dd4b39;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    border-radius: 10px;
+}
+
+/* Chat History Container */
+#chat-history-container {
+    width: 80%;
+    height: 70%;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#chat-history-header {
+    background-color: #004cff;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#chat-history-content {
+    display: flex;
+    height: 100%;
+}
+
+/* Chat List */
+#chat-list {
+    width: 30%;
+    background-color: #f2f2f2;
+    overflow-y: auto;
+    padding: 10px;
+    border-right: 1px solid #ddd;
+    overflow-y: auto;
+    height: 400px;
+}
+
+#close-chat-history {
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 18px;
+}
+
+.chat-session {
+    cursor: pointer;
+    padding: 10px;
+    border-bottom: 1px solid #ccc; /* Add a border to each chat session */
+}
+
+.chat-session:hover {
+    background-color: #f5f5f5; /* Add a hover effect */
+}
+
+#chat-conversation {
+    padding: 10px;
+    border: 1px solid #ccc;
+    height: 400px; /* Adjust height as necessary */
+    overflow-y: auto;
+}
 
 

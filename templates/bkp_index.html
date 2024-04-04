@@ -3,62 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="google-signin-client_id" content="">
+    <meta name="google-signin-client_id" content="299802479018-sgto31d6na5v4ft61m0nnhn2ctdvqv2r.apps.googleusercontent.com">
     <title>Mental Healthcare Assistant</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="https://apis.google.com/js/platform.js"></script>
 </head>
 <body>
-    <script src="https://accounts.google.com/gsi/client" async></script>
     <script>
-        function getCookie(name) {
-            return document.cookie.split('; ').find(row => row.startsWith(name+'='))?.split('=')[1]
+        // gapi.load('auth2', function() {
+        //         gapi.auth2.init({
+        //             client_id: '299802479018-sgto31d6na5v4ft61m0nnhn2ctdvqv2r.apps.googleusercontent.com',
+        //         }).then(function(auth2) {
+        //             console.log('After gapi.auth2.init')
+        //             gapi.signin2.render('my-signin2', {
+        //                 'scope': 'profile email',
+        //                 'width': 240,
+        //                 'height': 50,
+        //                 'longtitle': true,
+        //                 'theme': 'dark',
+        //                 'onsuccess': onSignIn,
+        //                 'onfailure': onFailure // Define an onFailure function to handle sign-in failures.
+        //             });
+        //             console.log('After gapi.signin2.render')
+        //         });
+        //     });
+        function onSignIn(googleUser) {
+            alert('hello')
+            var profile = googleUser.getBasicProfile();
+            console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+            console.log('Name: ' + profile.getName());
+            console.log('Image URL: ' + profile.getImageUrl());
+            console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+
+            // Update the UI with the user's name or email
+            var userInfo = document.getElementById('user-info');
+            userInfo.innerHTML = 'Signed in as: ' + (profile.getEmail() || profile.getName());
+            alert('hi')
+        }
+        function onFailure(error) {
+            console.log(error);
         }
 
-        function isUserAuthenticated() {
-            return getCookie('is_auth') === 'true'
+        function signOut() {
+            var auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(function () {
+                console.log('User signed out.');
+                // Clear the user info on sign out
+                var userInfo = document.getElementById('user-info');
+                userInfo.innerHTML = '';
+            });
         }
 
-        function getLoggedInUserEmail() {
-            if (isUserAuthenticated()) {
-                return getCookie('loggedin_user_email');
-            } else {
-                return ""
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', (event) => {
-            console.log(getLoggedInUserEmail())
-            // if (isAuth) {
-            //     // If the user is authenticated, show the sign-out button and hide the sign-in container
-            //     document.getElementById('signin-container').style.display = 'none';
-            //     document.getElementById('signout-button').style.display = 'block';
-            // } else {
-            //     // Ensure the sign-in button is shown if not authenticated
-            //     document.getElementById('signin-container').style.display = 'block';
-            //     document.getElementById('signout-button').style.display = 'none';
-            // }
-
-        });
     </script>
-    <div id="g_id_onload"
-        data-client_id=""
-        data-login_uri="http://localhost:5000/auth/google"
-        data-auto_prompt="false">
-    </div>
-    <div id="signin-container">
-        <div class="g_id_signin"
-            data-type="standard"
-            data-size="large"
-            data-theme="outline"
-            data-text="continue_with"
-            data-shape="rectangular"
-            data-logo_alignment="left">
-        </div>
-    </div>
 
-     <!-- Sign-out button (hidden by default) -->
-     <button id="signout-button" style="display:none;">Sign Out</button>
+    <div class="login-container">
+        <div class="g-signin2" data-onsuccess="onSignIn"></div>
+    </div>
 
     <div class="container">
         <h1>CareTalk AI</h1>
@@ -67,8 +67,6 @@
             <a href="#" id="open-chat" class="button">Text Message</a>
             <br><br><br>
             <!-- Updated to use JavaScript for opening the voice chat modal -->
-            <a href="#" id="view-past-chats" class="button">View Past Chats</a>
-            <br><br><br>
             <a href="#" id="open-voice-chat" class="button">Voice Message</a>
         </div>
     </div>
@@ -99,25 +97,6 @@
             </div>                        
         </div>
     </div>
-
-    <!-- Chat History Modal -->
-    <div id="chat-history-modal" class="modal" style="display:none;">
-        <div id="chat-history-container">
-            <div id="chat-history-header">
-                <span>Chat History</span>
-                <button id="close-chat-history">X</button>
-            </div>
-            <div id="chat-history-content">
-                <div id="chat-list" class="chat-sidebar">
-                    <!-- Chat titles will be populated here -->
-                </div>
-                <div id="chat-conversation" class="chat-main">
-                    <!-- Chat conversation will be displayed here -->
-                </div>
-            </div>
-        </div>
-    </div>
-
 
     <!-- Voice Chat Modal -->
     <div id="voice-chat-modal" class="modal" style="display:none;">
