@@ -55,6 +55,8 @@ h1 {
 
 #chat-history-modal {
     position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5); /* Dimmed background */
@@ -62,18 +64,6 @@ h1 {
     justify-content: center;
     align-items: center;
     z-index: 1000; /* Ensure modal is above other content */
-}
-
-#chat-history-container{
-    width: 100%; /* Further increased width */
-    height: 100%; /* Further increased height */
-    border-radius: 2px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    display: flex;
-    flex-direction: column;
-    align-self: center;
-    margin-top: 7%;
-    margin-left: 10%;
 }
 
 #chat-container {
@@ -285,8 +275,12 @@ h1 {
 
 /* Chat History Container */
 #chat-history-container {
-    width: 80%;
-    height: 70%;
+    margin-top: 1.5%;
+    margin-left: 2.5%;
+    width: 95%;
+    max-width: 95%; 
+    height: 95%;
+    max-height: 95%;
     background-color: #fff;
     border-radius: 5px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.2);
@@ -297,34 +291,35 @@ h1 {
 
 #chat-history-header {
     background-color: #004cff;
-    color: #fff;
-    padding: 10px;
+    color: #000;
+    padding: 15px 20px;
     text-align: center;
-    font-size: 18px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
     font-weight: bold;
 }
 
 #chat-history-content {
     display: flex;
     height: 100%;
+    /* Ensure the container does not exceed the modal's dimensions */
+    overflow: hidden; /* This prevents any overflow caused by its children */
 }
 
-/* Chat List */
 #chat-list {
-    width: 30%;
-    background-color: #f2f2f2;
+    width: 30%; /* Existing width */
+    flex: none; /* Prevent flexbox from adjusting its size */
     overflow-y: auto;
     padding: 10px;
     border-right: 1px solid #ddd;
-    overflow-y: auto;
-    height: 400px;
+    height: auto; /* Or match to the container's height if needed for consistency */
 }
 
 #close-chat-history {
     cursor: pointer;
     position: absolute;
-    top: 10px;
-    right: 20px;
+    top: 5.3%;
+    right: 10%;
     background: none;
     border: none;
     color: #fff;
@@ -343,9 +338,48 @@ h1 {
 
 #chat-conversation {
     padding: 10px;
-    border: 1px solid #ccc;
-    height: 400px; /* Adjust height as necessary */
+    border-left: 1px solid #ccc; /* Added to visually separate from the chat list */
     overflow-y: auto;
+    flex-grow: 1; /* This ensures it takes up the remaining space */
 }
 
 
+#signout-button {
+    background-color: #f5f5f5;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+#user-profile-picture {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+/* This styles the .auth-buttons-container to be positioned at the top right of the page */
+.auth-buttons-container {
+    position: fixed; /* Use fixed positioning to place the container relative to the viewport */
+    top: 0; /* Align to the top of the viewport */
+    right: 0; /* Align to the right of the viewport */
+    padding: 10px; /* Add some padding around the buttons */
+    z-index: 1000; /* Ensure it stays on top of other content */
+}
+
+/* Optional: Style adjustments for the sign-in and sign-out buttons */
+.auth-container, #signout-button {
+    margin: 0;
+    margin-bottom: 5px; /* Adds a little space between the buttons if both are shown */
+    display: flex; /* This ensures the alignment of elements inside the button */
+    align-items: center; /* Centers the items vertically inside the button */
+}
+
+.modal-content {
+    max-height: 95%; /* Adjust based on your modal's padding and desired appearance */
+    display: flex;
+    flex-direction: column;
+}

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="google-signin-client_id" content="">
+    <meta name="google-signin-client_id" content="299802479018-sgto31d6na5v4ft61m0nnhn2ctdvqv2r.apps.googleusercontent.com">
     <title>Mental Healthcare Assistant</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="https://apis.google.com/js/platform.js"></script>
@@ -29,36 +29,42 @@
 
         document.addEventListener('DOMContentLoaded', (event) => {
             console.log(getLoggedInUserEmail())
-            // if (isAuth) {
-            //     // If the user is authenticated, show the sign-out button and hide the sign-in container
-            //     document.getElementById('signin-container').style.display = 'none';
-            //     document.getElementById('signout-button').style.display = 'block';
-            // } else {
-            //     // Ensure the sign-in button is shown if not authenticated
-            //     document.getElementById('signin-container').style.display = 'block';
-            //     document.getElementById('signout-button').style.display = 'none';
-            // }
+            console.log(getCookie('picture'))
+            document.getElementById('user-profile-picture').src = getCookie('loggedin_user_picture');
+            if (isUserAuthenticated()) {
+                // If the user is authenticated, show the sign-out button and hide the sign-in container
+                document.getElementById('signin-container').style.display = 'none';
+                document.getElementById('signout-button').style.display = 'block';
+            } else {
+                // Ensure the sign-in button is shown if not authenticated
+                document.getElementById('signin-container').style.display = 'block';
+                document.getElementById('signout-button').style.display = 'none';
+            }
 
         });
     </script>
     <div id="g_id_onload"
-        data-client_id=""
+        data-client_id="299802479018-sgto31d6na5v4ft61m0nnhn2ctdvqv2r.apps.googleusercontent.com"
         data-login_uri="http://localhost:5000/auth/google"
         data-auto_prompt="false">
     </div>
-    <div id="signin-container">
-        <div class="g_id_signin"
-            data-type="standard"
-            data-size="large"
-            data-theme="outline"
-            data-text="continue_with"
-            data-shape="rectangular"
-            data-logo_alignment="left">
+    <div class="auth-buttons-container">
+        <div id="signin-container" class="auth-container">
+            <div class="g_id_signin"
+                data-type="standard"
+                data-size="large"
+                data-theme="outline"
+                data-text="continue_with"
+                data-shape="rectangular"
+                data-logo_alignment="left">
+            </div>
         </div>
+        
+        <button id="signout-button" class="auth-container" style="background-color: #f5f5f5; border: 1px solid #ccc; border-radius: 5px; padding: 5px 10px; display: flex; align-items: center; cursor: pointer;">
+            <img id="user-profile-picture" src="" alt="User" style="width: 20px; height: 20px; border-radius: 50%; margin-right: 5px;">
+            Sign Out
+        </button>
     </div>
-
-     <!-- Sign-out button (hidden by default) -->
-     <button id="signout-button" style="display:none;">Sign Out</button>
 
     <div class="container">
         <h1>CareTalk AI</h1>
@@ -83,13 +89,16 @@
             <div id="chat-box"></div>
             <div class="feedback-buttons">
                 <button class="upvote">👍</button>
-                <button class="downvote">👎</button>
+                <button class="downvote" id="downvoteButton">👎</button>
+                <!-- Hidden input to store the last user message -->
+                <input type="hidden" id="lastUserMessage" value="">
                 <br><br>
                 <div id="chat-actions">
                     <button id="download-chat">Download Chat Summary</button>
                     <form id="emailForm">
                         <input type="email" id="email-input" name="email" placeholder="Enter your email" />
                         <button id="email-chat" type="submit">Email Chat Conversation</button>
+                        <button id="email-transcript" type="button">Email Transcript</button>
                     </form>
                 </div>
             </div>
@@ -146,8 +155,8 @@
             <div id="chat-actions">
                 <button id="download-voice-chat">Download Chat Summary</button>
                 <form id="emailFormVoice">
-                    <input type="email" id="email-input" name="email" placeholder="Enter your email" />
-                    <button id="email-chat" type="submit">Email Chat Conversation</button>
+                    <input type="email" id="voice-email-input" name="email" placeholder="Enter your email" />
+                    <button id="voice-email-chat" type="submit">Email Chat Conversation</button>
                 </form>
             </div>                        
             </div>
@@ -157,6 +166,7 @@
     </div>
     <script src="https://apis.google.com/js/platform.js" async defer></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ url_for('static', filename='auth.js') }}"></script>
 </body>
 </html>
 

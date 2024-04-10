@@ -23,14 +23,43 @@ document.addEventListener('DOMContentLoaded', function() {
         sendChatSummaryEmail();
     });
 
+    document.getElementById('email-transcript').addEventListener('click', function() {
+        var email = document.getElementById('email-input').value;  // Assuming you have an input with id 'emailTextbox'
+        console.log("emailis:", email)
+        if(email) {
+            // Prepare the data to be sent
+            var data = { email: email };
+            
+            fetch('/email_chat_transcript', {  // Change the endpoint as needed
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert("Email sent successfully!");
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert("Failed to send email.");
+            });
+        } else {
+            alert("Please enter an email address.");
+        }
+    });
+    
+
     document.getElementById('emailFormVoice').addEventListener('submit', function(e) {
         e.preventDefault(); // Prevent the default form submission
-        sendChatSummaryEmail();
+        sendVoiceChatSummaryEmail();
     });
     
     
     function sendChatSummaryEmail() {
         const email = document.getElementById('email-input').value;
+        console.log(email)
     
         // Use Fetch API to send a POST request to your Flask endpoint
         fetch('/email_chat_summary', {
@@ -44,7 +73,24 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => console.log(data.message))
         .catch(error => console.error('Error sending email:', error));
     }
+
+    function sendVoiceChatSummaryEmail() {
+        const email = document.getElementById('voice-email-input').value;
+        console.log(email)
     
+        // Use Fetch API to send a POST request to your Flask endpoint
+        fetch('/email_chat_summary', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `email=${encodeURIComponent(email)}`,
+        })
+        .then(response => response.json())
+        .then(data => console.log(data.message))
+        .catch(error => console.error('Error sending email:', error));
+    }
+
     // Open text chat modal
     document.getElementById('view-past-chats').addEventListener('click', function(event) {
         event.preventDefault();
@@ -81,11 +127,36 @@ document.addEventListener('DOMContentLoaded', function() {
             chatList.appendChild(chatDiv);
         });
     }
-    
+
     function displayFullChat(chatContent) {
         const chatDisplay = document.getElementById('chat-conversation');
-        chatDisplay.innerHTML = chatContent.replace(/\n/g, '<br>'); // Replace line breaks with HTML for display
+        chatDisplay.innerHTML = ''; // Clear previous content
+    
+        // Split the chatContent by newline and iterate through each line
+        chatContent.split('\n').forEach(line => {
+            const messageDiv = document.createElement('div');
+            
+            // Check if the line starts with "User:" or "Assistant:" and style accordingly
+            if (line.startsWith('User:')) {
+                messageDiv.classList.add('user-message');
+                messageDiv.innerHTML = line.substring(5); // Remove "User:" from the display text
+            } else if (line.startsWith('Assistant:') || line.startsWith('Ai:') || line.startsWith('System:')) {
+                messageDiv.classList.add('ai-message');
+                messageDiv.innerHTML = line.substring(10); // Remove "Assistant:" from the display text
+            } else {
+                // For lines that don't start with "User:" or "Assistant:", treat them as continuation of the previous message
+                messageDiv.innerHTML = line;
+            }
+    
+            chatDisplay.appendChild(messageDiv);
+        });
     }
+    
+    
+    // function displayFullChat(chatContent) {
+    //     const chatDisplay = document.getElementById('chat-conversation');
+    //     chatDisplay.innerHTML = chatContent.replace(/\n/g, '<br>'); // Replace line breaks with HTML for display
+    // }
 
     closeHistoryButton.addEventListener('click', function() {
         chatHistModal.style.display = 'none';
@@ -313,42 +384,81 @@ document.addEventListener('DOMContentLoaded', function() {
         mouthOverlay.style.display = 'none'; // Optionally hide the overlay again
     }
 
-    document.querySelectorAll('.feedback-buttons .upvote').forEach(button => {
-        button.addEventListener('click', function() {
-            sendFeedback('positive');
-        });
-    });
+    // document.querySelectorAll('.feedback-buttons .upvote').forEach(button => {
+    //     button.addEventListener('click', function() {
+    //         sendFeedback('positive');
+    //     });
+    // });
     
-    document.querySelectorAll('.feedback-buttons .downvote').forEach(button => {
-        button.addEventListener('click', function() {
-            sendFeedback('negative');
-        });
-    });
+    // document.querySelectorAll('.feedback-buttons .downvote').forEach(button => {
+    //     button.addEventListener('click', function() {
+    //         sendFeedback('negative');
+    //     });
+    // });
     
-    function sendFeedback(feedbackType) {
-        // Assuming you're sending feedback for the most recent message
-        // You might need to adjust this depending on how you're tracking message IDs
-        // For simplicity, this example does not include message ID tracking
+    // function sendFeedback(feedbackType) {
+    //     // Assuming you're sending feedback for the most recent message
+    //     // You might need to adjust this depending on how you're tracking message IDs
+    //     // For simplicity, this example does not include message ID tracking
     
-        fetch('/send_feedback', {
+    //     fetch('/send_feedback', {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //         },
+    //         body: JSON.stringify({
+    //             messageId: "latestMessageId", // Replace "latestMessageId" with actual message ID tracking logic
+    //             feedback: feedbackType,
+    //         }),
+    //     })
+    //     .then(response => response.json())
+    //     .then(data => {
+    //         console.log('Feedback sent:', data);
+    //         // Handle any follow-up UI changes here (e.g., disable feedback buttons)
+    //     })
+    //     .catch(error => {
+    //         console.error('Error sending feedback:', error);
+    //     });
+    // }
+    
+    var downvoteButton = document.getElementById('downvoteButton'); // Ensure this ID matches your downvote button's ID
+    
+    downvoteButton.addEventListener('click', function() {
+        fetch('/handle_downvote', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                messageId: "latestMessageId", // Replace "latestMessageId" with actual message ID tracking logic
-                feedback: feedbackType,
-            }),
+            }
         })
         .then(response => response.json())
         .then(data => {
-            console.log('Feedback sent:', data);
-            // Handle any follow-up UI changes here (e.g., disable feedback buttons)
+            console.log('Downvote response:', data.message);
+            // Now, resend the last user input automatically
+            // Assuming `lastUserMessage` holds the last user input
+            if(lastUserMessage) {
+                fetch('/get_response', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_input: lastUserMessage })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Update the UI with the new response
+                    console.log('New response:', data.message);
+                    // Update your chat window or UI component here
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+            }
         })
-        .catch(error => {
-            console.error('Error sending feedback:', error);
+        .catch((error) => {
+            console.error('Error:', error);
         });
-    }
+    });
+        
 
     function downloadChatSummary() {
         console.log("Attempting to download chat summary...");
@@ -397,5 +507,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => console.error('Download error:', error));
     }
+
+    
 
 });
