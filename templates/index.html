@@ -31,6 +31,7 @@
             console.log(getLoggedInUserEmail())
             console.log(getCookie('picture'))
             document.getElementById('user-profile-picture').src = getCookie('loggedin_user_picture');
+            console.log(getCookie('loggedin_user_picture'))
             if (isUserAuthenticated()) {
                 // If the user is authenticated, show the sign-out button and hide the sign-in container
                 document.getElementById('signin-container').style.display = 'none';
@@ -88,7 +89,7 @@
             </div>
             <div id="chat-box"></div>
             <div class="feedback-buttons">
-                <button class="upvote">👍</button>
+                <!-- <button class="upvote">👍</button> -->
                 <button class="downvote" id="downvoteButton">👎</button>
                 <!-- Hidden input to store the last user message -->
                 <input type="hidden" id="lastUserMessage" value="">
@@ -97,7 +98,7 @@
                     <button id="download-chat">Download Chat Summary</button>
                     <form id="emailForm">
                         <input type="email" id="email-input" name="email" placeholder="Enter your email" />
-                        <button id="email-chat" type="submit">Email Chat Conversation</button>
+                        <button id="email-chat" type="submit">Email Chat Summary</button>
                         <button id="email-transcript" type="button">Email Transcript</button>
                     </form>
                 </div>
@@ -136,11 +137,11 @@
                 <button id="close-voice-chat">X</button>
             </div>
             <div id="voice-controls">
-                <label for="voice-select">Choose AI Voice Gender:</label>
+                <!-- <label for="voice-select">Choose AI Voice Gender:</label>
                 <select id="voice-gender-select">
                     <option value="male">Male</option>
                     <option value="female">Female</option>
-                </select>
+                </select> -->
                 <button id="record-voice">Record Voice</button>
             </div>
             <div id="transcript">
@@ -149,8 +150,8 @@
                 <div id="mouth-overlay"></div>
             </div>
             <div class="feedback-buttons">
-                <button class="upvote">👍</button>
-                <button class="downvote">👎</button>
+                    <!-- <button class="upvote">👍</button>
+                    <button class="downvote">👎</button> -->
             <br><br>
             <div id="chat-actions">
                 <button id="download-voice-chat">Download Chat Summary</button>

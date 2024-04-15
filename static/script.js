@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const recordButton = document.getElementById('record-voice');
     const voiceModal = document.getElementById('voice-chat-modal');
     const closeVoiceChatButton = document.getElementById('close-voice-chat');
-    const voiceGenderSelect = document.getElementById('voice-gender-select'); // Dropdown for selecting voice gender
+    //const voiceGenderSelect = document.getElementById('voice-gender-select'); // Dropdown for selecting voice gender
 
     let isRecording = false;
     let recognition;
@@ -354,11 +354,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function speakAIResponse(message) {
         let utterance = new SpeechSynthesisUtterance(message);
-        let selectedVoiceGender = voiceGenderSelect.value;
+        // let selectedVoiceGender = voiceGenderSelect.value;
         
         // Assuming you've fetched voices and filtered them based on gender
         let voices = speechSynthesis.getVoices();
-        utterance.voice = voices.find(voice => voice.gender === selectedVoiceGender); // Simplified, adjust as needed
+        // utterance.voice = voices.find(voice => voice.gender === selectedVoiceGender); // Simplified, adjust as needed
 
         utterance.onstart = function() {
             startTalking(); // Start the mouth blinking when speech starts
@@ -421,45 +421,58 @@ document.addEventListener('DOMContentLoaded', function() {
     //     });
     // }
     
-    var downvoteButton = document.getElementById('downvoteButton'); // Ensure this ID matches your downvote button's ID
+    // var downvoteButton = document.getElementById('downvoteButton'); // Ensure this ID matches your downvote button's ID
+
+    // downvoteButton.addEventListener('click', function() {
+    //     // It seems you're trying to get the last user message. Make sure this aligns with your actual UI structure.
+    //     const message = this.previousElementSibling ? this.previousElementSibling.textContent : "";
     
+    //     fetch('/downvote', {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //         },
+    //         // The body might need adjustment depending on how you're identifying messages on the server side.
+    //         body: JSON.stringify({ message: message.trim() }),
+    //     })
+    //     .then(response => response.json())
+    //     .then(data => {
+    //         // Use the displayMessage function to add the new message to the UI.
+    //         displayMessage(data.message, 'ai');
+    //     })
+    //     .catch(error => {
+    //         console.error('Error:', error);
+    //     });
+    // });
+
+    var downvoteButton = document.getElementById('downvoteButton'); // Ensure this ID matches your downvote button's ID
+
     downvoteButton.addEventListener('click', function() {
-        fetch('/handle_downvote', {
+        // Assuming the last message is always from the AI when the downvote is clicked
+        // Find the last AI message element in the chatBox and remove it
+        const aiMessages = document.querySelectorAll('.ai-message');
+        if (aiMessages.length > 0) {
+            const lastAiMessage = aiMessages[aiMessages.length - 1];
+            chatBox.removeChild(lastAiMessage);
+        }
+
+        fetch('/downvote', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-            }
+            },
+            body: JSON.stringify({}), // Adjust as needed for your downvote endpoint's requirements
         })
         .then(response => response.json())
         .then(data => {
-            console.log('Downvote response:', data.message);
-            // Now, resend the last user input automatically
-            // Assuming `lastUserMessage` holds the last user input
-            if(lastUserMessage) {
-                fetch('/get_response', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ user_input: lastUserMessage })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // Update the UI with the new response
-                    console.log('New response:', data.message);
-                    // Update your chat window or UI component here
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
-                });
-            }
+            displayMessage(data.message, 'ai'); // Display the new AI response
         })
-        .catch((error) => {
+        .catch(error => {
             console.error('Error:', error);
         });
     });
-        
 
+    
     function downloadChatSummary() {
         console.log("Attempting to download chat summary...");
         fetch('/download_chat_summary')

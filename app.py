@@ -31,7 +31,6 @@ mail = Mail(app)
 
 feedback_db = {}  # This will store feedback as {message_id: feedback}
 chats = []
-
 # MongoDB setup
 MONGODB_URI="mongodb://localhost:27017/"
 MONGO_DB_NAME="MentalHealthcareDB"
@@ -44,6 +43,9 @@ user_history_col = db['userHistory']
 @app.route('/')
 def home():
     session['conversation'] = []  # Reset the conversation every time the main page is loaded
+    if 'loggedin_user_email' in request.cookies:
+        email = request.cookies['loggedin_user_email']
+        session['chat_summary_context'] = get_user_chats_summary()
     return render_template('index.html')
 
 @app.route('/send_feedback', methods=['POST'])
@@ -64,28 +66,38 @@ def get_response():
     
     # Here we add the user input to the session's conversation history.
     session['conversation'].append({"role": "user", "content": user_input})
+
+    #user_email = request.cookies.get('loggedin_user_email')
+    #print("user email", user_email)
     
+    # Get summarized context of the user's previous chats
+    #chat_summary_context = get_user_chats_summary()
+    #Here is previous information about the user : {chat_summary_context} Take this context whenever there is need in the conversation.
+    chat_summary_context = session.get('chat_summary_context', "")
+    print("chat summary context: ", chat_summary_context)    
+    print("end summary")
     # Prepare the initial setup guidance along with the conversation history for the model.
-    initial_setup = """You are a highly skilled and empathetic mental health assistant, trained to offer support with compassion and understanding. In your responses, reflect deep empathy and offer guidance, echoing the care and insight of a seasoned mental health expert.
+    initial_setup = """You are a mental health assistant, trained to proactively recall and integrate details from previous conversations to offer personalized and compassionate support. When responding, follow these guidelines:
 
-Engage deeply by asking open-ended questions, encouraging reflection and discussion.
-Provide thoughtful, specific, and actionable advice, tailoring your guidance to the unique context and details shared by the user.
-Remember and seamlessly integrate details from the user's previous messages to build a coherent and supportive dialogue. Your memory is key to personalizing the conversation.
-Stay focused on topics related to mental health and well-being. Avoid diverting into unrelated subjects, maintaining professional boundaries and relevance.
-In cases where the user's input is brief or lacks detail, use your understanding from the ongoing conversation to offer responses that are insightful and nurturing.
-Your goal is to be a source of support, offering elaborate guidance and fostering a safe space for users to explore their feelings and challenges.
+Proactively Use Context: Continually integrate relevant details from previous interactions (summarized in the {chat_summary_context}), even if the user does not explicitly refer to past discussions. This helps in maintaining a coherent dialogue that reflects a deep understanding of the user's ongoing mental health journey.
 
-In addition to the guidelines provided:
+Show Empathy and Provide Tailored Advice: Deliver empathetic responses that are also enriched with specific advice tailored to the user's unique emotional and mental health needs. Link current concerns with past discussions proactively, highlighting progress, recurring issues, or introducing new strategies as appropriate.
 
-Maintain a Singular Focus on Mental Health: Your primary role is to offer support and guidance on issues directly related to mental health and emotional well-being. If the conversation starts to shift towards topics outside of mental health, such as general knowledge, science, math, or any other unrelated subjects, gently redirect the user back to topics of mental health.
+Maintain Focus on Mental Health: Your primary role is to assist with mental health concerns. If the conversation shifts, gently redirect back to the topics of emotional and mental health. Explain your specialized role and express your readiness to support them in this specific area.
 
-Guidance on Redirecting Conversations: When faced with questions or discussions not related to mental health, respond with empathy and understanding, reminding the user of your specific role as a mental health assistant. Offer to continue supporting them with any concerns or questions they have about their mental health and emotional well-being.
+Encourage Reflective Dialogue: Use open-ended questions to foster deeper reflection and encourage the user to explore their feelings and challenges, aiding in building a therapeutic dialogue.
 
-Example of Redirecting: If a user asks a question unrelated to mental health, you might respond with: 'I'm here to support you with any mental health concerns you might have. While I can't provide answers to questions outside of this area, I'm interested in how you're feeling today or if there's anything on your mind related to your emotional well-being that you'd like to talk about.'
+Ensure Safety and Support: Create a supportive environment where emotions can be freely expressed, and the user feels heard and cared for, all while maintaining professional boundaries and relevance to mental health.
 
-Ensuring a Safe and Supportive Environment: Your responses should always aim to create a supportive space for users to explore and discuss their feelings, experiences, and challenges related to mental health. Encourage open-ended discussion, reflection, and the expression of emotions, ensuring users feel heard, understood, and cared for.
+Adapt Interaction Based on Evolving Needs: Continually assess whether to build on the existing context or address new information specifically. Always aim to provide insightful and nurturing responses based on the evolving needs of the user.
 
-Remember, your goal is to foster a trusting and empathetic dialogue that focuses solely on mental health and emotional well-being, providing guidance and support tailored to each user's unique experiences and needs"""
+Example of Proactive Contextual Memory Integration:
+
+User: 'I've been feeling a bit overwhelmed lately.'
+
+Response: 'I'm sorry to hear you're feeling overwhelmed. Last time we talked about similar feelings when discussing work stress. Have you noticed any specific triggers recently that might be contributing to this, or are there any new stressors we haven't discussed yet?'
+
+This refined approach encourages you to be proactive in recalling and applying past conversation details, thereby enhancing the continuity and depth of support, much like a real-life mental health professional."""
     
     conversation_with_setup = [{"role": "system", "content": initial_setup}] + session['conversation']
     
@@ -101,7 +113,7 @@ Remember, your goal is to foster a trusting and empathetic dialogue that focuses
             #ft:gpt-3.5-turbo-0613:personal::8pmxCD6k
             model="ft:gpt-3.5-turbo-0613:personal::9CB4CCRl",
             messages=conversation_with_setup,
-            max_tokens=250,
+            max_tokens=300,
             temperature = 0.2
         )
         
@@ -140,29 +152,38 @@ Remember, your goal is to foster a trusting and empathetic dialogue that focuses
 #     return jsonify({'message': message})
 
 
-@app.route('/handle_downvote', methods=['POST'])
-def handle_downvote():
-    # Check if there is a conversation history
+@app.route('/downvote', methods=['POST'])
+def downvote():
     if 'conversation' not in session or len(session['conversation']) < 2:
-        return jsonify({'message': 'No previous interaction found to downvote.'})
-    
-    # Assume the last message in the conversation is the one to downvote
-    # And the previous one is the user's input leading to that response
-    feedback_prompt = "The previous response was not satisfactory. Please provide a different perspective or approach."
-    
-    # Alter the conversation history here to incorporate the feedback
-    # For simplicity, let's just add the feedback prompt to the conversation
-    # You might want to adjust or remove the last AI response instead
-    session['conversation'].append({"role": "system", "content": feedback_prompt})
-    
-    # Ensure any changes are saved
+        print("no response")
+        return jsonify({'message': 'No previous response to downvote.'}), 400
+
+    # Remove the last bot response
+    last_user_message = session['conversation'][-2]
+    session['conversation'].pop()
+
+    # Optionally, adjust your setup or parameters here to generate a different response
+    # For simplicity, this example just repeats the process of getting a response to the last user input.
+    try:
+        response = openai.ChatCompletion.create(
+            model="ft:gpt-3.5-turbo-0613:personal::9CB4CCRl",
+            messages=[{"role": "system", "content": last_user_message["content"]}],  # This might need to be adjusted
+            max_tokens=250,
+            temperature=0.6  # Adjusting temperature for variety
+        )
+        
+        if response.choices:
+            new_message = response.choices[0].message['content'].strip()
+            # Replace the last response with the new one
+            session['conversation'].append({"role": "assistant", "content": new_message})
+        else:
+            new_message = "No response generated."
+    except Exception as e:
+        new_message = "Error: " + str(e)
+
     session.modified = True
-    
-    # Since direct calling of `get_response` isn't straightforward in Flask,
-    # and to avoid duplicate code, you return an instruction to the client to resend the last user input.
-    # This could be handled more elegantly with JavaScript on the client side by automatically resending
-    # the last request or by adjusting the UI/UX flow.
-    return jsonify({'message': 'Feedback noted. Please resend your last question or statement.'})
+    print("new conv: ", session['conversation'], new_message)
+    return jsonify({'message': new_message})
 
 
 
@@ -204,7 +225,12 @@ def getChatSummary():
 
     chat_summary = openai.Completion.create(
         engine="gpt-3.5-turbo-instruct",  # Choose a suitable summarization engine
-        prompt=f"Provide a clear and concise Summary the following text:\n{[full_conversation]}. In this summary identify context and replace AI with 'mental healthcare expert' and User with you",
+        prompt=f""" 
+        Please summarize the provided conversation, ensuring to capture all key points and context. In your summary:
+Refer to the AI as 'mental healthcare expert.'
+Use 'you' to refer to the User's perspective.
+Provide a concise yet comprehensive overview of the discussion, ensuring no important details are omitted.
+Here is the conversation: {[full_conversation]}""",
         max_tokens=350,  # Adjust for desired summary length (shorter = less detail)
         n=1,  # Number of summaries to generate (usually 1 is enough)
         stop=None,  # Optional stop sequence to indicate summary completion
@@ -233,6 +259,47 @@ def email_chat_summary():
     send_chat_summary_email("Chat Summary - CareTalk AI", recipient, chat_summary)
     print("chat summary and email", chat_summary, recipient)
     return {'status': 'success', 'message': 'Email sent successfully.'}
+
+def get_user_chats_summary():
+    """
+    Fetch all chats for the given user email, summarize them, and return the summary.
+    """
+    chats = get_chats_for_user()
+    # summary = get_user_chats_summary(chats)
+    # print("chat summary", summary)
+    
+    if not chats:
+        return "No chats found for the user."
+    
+    # Join all chats into a single string
+    all_chats = "\n".join(chats)
+    print("all chats", all_chats)
+    
+    # Now, let's summarize the chats
+    summary = openai.Completion.create(
+        engine="gpt-3.5-turbo-instruct",  # Use an appropriate engine for summarization
+        prompt=f"""Please provide a detailed summary of the provided conversations between a user and an AI assistant, designated as {all_chats}. This summary should encompass:
+
+Identification of Main Topics: Describe each main topic discussed throughout the conversations.
+Key Questions and Responses: List out the significant questions raised by the user and the corresponding answers provided by the AI.
+Emerging Themes or Issues: Note any recurring themes or challenges that are evident across the dialogues.
+Contextual Background: Offer any relevant context that might influence the understanding of the conversations, such as the user's intent or the AI's guidance.
+Outcome and Resolution: Highlight any conclusions reached or solutions proposed during the exchanges.
+Ensure that the summary is clear, structured, and devoid of redundant information, providing a concise yet thorough overview of the dialogue exchanges.""",
+        temperature=0.1,
+        max_tokens=550,
+        n=1,
+        stop=None
+    #     top_p=1.0,
+    #     frequency_penalty=0.0,
+    #     presence_penalty=0.0
+    )
+    print("summary",  summary['choices'][0]['text'])
+    if summary.choices:
+        return summary.choices[0].text.strip()
+    else:
+        return "Failed to generate a summary."
+
 
 def get_google_signing_key(token):
     keys_url = 'https://www.googleapis.com/oauth2/v3/certs'
@@ -269,7 +336,8 @@ def google_auth():
         response.set_cookie('loggedin_user_fullname', decoded_token['name'], max_age=60*60*24)  # Example: Expires in 1 day
         response.set_cookie('loggedin_user_picture', decoded_token['picture'], max_age=60*60*24)  # Example: Expires in 1 day
         response.set_cookie('user_google_auth_token', token, max_age=60*60*24)  # Example: Expires in 1 day
-
+        #session['chat_summary_context'] = get_user_chats_summary()
+    
         return response
 
     except jwt.ExpiredSignatureError:
@@ -295,7 +363,9 @@ def get_chats_for_user():
     user_documents = user_history_col.find({'email': email})
     documents_list = list(user_documents)
     print(f"Email {email} found in the database. Documents': {documents_list}")
-    chats = documents_list[0]['chats']
+    # chats = documents_list[0]['chats']
+    # summary = get_user_chats_summary(chats)
+    # print("chat summary", summary)
     return documents_list[0]['chats']
 
 def storeChatToMongoDB(email, conversation):
@@ -356,7 +426,8 @@ def signout():
         requests.post('https://oauth2.googleapis.com/revoke',
                       params={'token': token},
                       headers = {'content-type': 'application/x-www-form-urlencoded'})
-    
+    if 'chat_summary_context' in session:
+        del session['chat_summary_context']
 
     # Clear cookies
     response = make_response(redirect('/'))
