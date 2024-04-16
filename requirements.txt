@@ -1,0 +1,4 @@
+flask_cors
+flask_mail
+openai==0.28
+pinecone-client

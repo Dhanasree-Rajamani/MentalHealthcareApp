@@ -10,15 +10,21 @@ from jwt import PyJWKClient
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
+from langchain.embeddings.openai import OpenAIEmbeddings
+from pinecone import Pinecone
+
+pc = Pinecone(api_key= "", environment='gcp-starter')
 
 load_dotenv()
 
-GOOGLE_AUTH_CLIENT_ID = os.getenv('GOOGLE_AUTH_CLIENT_ID')
-
+GOOGLE_AUTH_CLIENT_ID = ""
 app = Flask(__name__)
 
-app.secret_key = os.getenv('APP_SECRET_KEY')
-openai.api_key = os.getenv('OPENAI_API_KEY')
+APP_SECRET_KEY = ""
+MAIL_PASSWORD = ""
+
+app.secret_key = ""
+openai.api_key = ""
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
@@ -40,6 +46,24 @@ mongo = MongoClient(MONGODB_URI)
 db = mongo[MONGO_DB_NAME]
 user_history_col = db['userHistory']
 
+embeddings = OpenAIEmbeddings(
+    model = 'text-embedding-ada-002',
+    openai_api_key= ""
+)
+
+index_name = 'test'
+
+index = pc.Index(index_name)
+
+text_field = 'text'  # the metadata field that contains our text
+
+from langchain.vectorstores import Pinecone
+
+# initialize the vector store object
+vectorstore = Pinecone(
+    index, embeddings.embed_query, text_field
+)
+
 @app.route('/')
 def home():
     session['conversation'] = []  # Reset the conversation every time the main page is loaded
@@ -57,12 +81,33 @@ def send_feedback():
     feedback_db[message_id] = feedback
     return jsonify({"status": "success", "message": "Feedback received"})
 
+def augment_prompt(query: str):
+    # get top 3 results from knowledge base
+    results = vectorstore.similarity_search(query, k=3)
+    # get the text from the results
+    source_knowledge = "\n".join([x.page_content for x in results])
+
+    # feed into an augmented prompt
+    augmented_prompt = f"""
+
+    Understand the user's question and leverage your knowledge to provide a helpful response. If the question requires expertise beyond your current capabilities, use source_knowledge to access additional information. If source_knowledge is not relevant, simply provide a polite response acknowledging any limitations.
+    
+    Contexts:
+    {source_knowledge}
+
+    Examples:
+
+
+    Query: {query}"""
+    return augmented_prompt
+
 @app.route('/get_response', methods=['POST'])
 def get_response():
     if 'conversation' not in session:
         session['conversation'] = []
 
     user_input = request.json['user_input']
+    
     
     # Here we add the user input to the session's conversation history.
     session['conversation'].append({"role": "user", "content": user_input})
@@ -95,11 +140,12 @@ Example of Proactive Contextual Memory Integration:
 
 User: 'I've been feeling a bit overwhelmed lately.'
 
-Response: 'I'm sorry to hear you're feeling overwhelmed. Last time we talked about similar feelings when discussing work stress. Have you noticed any specific triggers recently that might be contributing to this, or are there any new stressors we haven't discussed yet?'
+Response: 'Oh Dear! I'm sorry to hear you're feeling overwhelmed. Last time we talked about similar feelings when discussing work stress. Have you noticed any specific triggers recently that might be contributing to this, or are there any new stressors we haven't discussed yet?'
 
 This refined approach encourages you to be proactive in recalling and applying past conversation details, thereby enhancing the continuity and depth of support, much like a real-life mental health professional."""
     
-    conversation_with_setup = [{"role": "system", "content": initial_setup}] + session['conversation']
+    conversation_with_setup = [{"role": "system", "content": initial_setup},
+                               {"role": "user", "content": augment_prompt(user_input)}] + session['conversation']
     
     #conversation_with_setup =  session['conversation']
     
