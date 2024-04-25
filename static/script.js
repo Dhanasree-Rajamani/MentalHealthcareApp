@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('open-chat').addEventListener('click', function(event) {
         event.preventDefault();
         chatModal.style.display = 'block';
-        displayMessage("Hi! I am your AI assistant! I can help with your mental health. Let us have a conversation!", 'ai');
+        displayMessage("Hi! I am your AI assistant! I can help with your mental health. Let us have a conversation! If you are facing a mental health emergency, please call 911 immediately.", 'ai');
     });
 
     // Close text chat modal
@@ -294,7 +294,7 @@ document.addEventListener('DOMContentLoaded', function() {
         initSpeechRecognition(); // Prepare speech recognition but don't start yet
 
         // Greet the user with the AI's voice message in the selected gender voice as soon as the voice message window opens
-        speakAIResponse("Hi! I am your AI assistant! I can help with your mental health. Let us have a conversation!");
+        speakAIResponse("Hi! I am your AI assistant! I can help with your mental health. Let us have a conversation! If you are facing a mental health emergency, please call 911 immediately");
     });
 
     // Close voice chat modal
