@@ -155,7 +155,7 @@ def get_response():
             #ft:gpt-3.5-turbo-0613:personal::9FnG44zU
             model="ft:gpt-3.5-turbo-0613:personal::9FqV28I6",
             messages=conversation_with_setup,
-            max_tokens=200,
+            max_tokens=350,
             temperature = 0.2
         )
         
@@ -210,7 +210,7 @@ def downvote():
         response = openai.ChatCompletion.create(
             model="ft:gpt-3.5-turbo-0613:personal::9CB4CCRl",
             messages=[{"role": "system", "content": last_user_message["content"]}],  # This might need to be adjusted
-            max_tokens=150,
+            max_tokens=350,
             temperature=0.6  # Adjusting temperature for variety
         )
         
@@ -267,9 +267,15 @@ def getChatSummary():
 
     chat_summary = openai.Completion.create(
         engine="gpt-3.5-turbo-instruct",  # Choose a suitable summarization engine
-        prompt=f"""Summarize {full_conversation}, noting key topics, significant questions and responses, recurring themes, contextual background, and outcomes. Refer to the AI as 'mental healthcare expert' and address the user as 'you.'""",
+        prompt=f"""Summarize the provided conversation designated as {full_conversation}:
+Main Topics: Outline each key topic discussed.
+Key Interactions: Detail significant questions from the user and answers from the AI, referred to as 'mental healthcare expert.'
+Recurring Themes: Identify any consistent themes or issues throughout the conversations.
+Contextual Insights: Provide any relevant background that affects the understanding of the dialogue.
+Conclusions: Note any outcomes or solutions reached.
+Ensure the summary is concise, structured, and includes all critical elements without redundancy""",
         temperature=0.1,
-        max_tokens=200,
+        max_tokens=350,
         n=1,
         stop=None
     )
@@ -324,7 +330,7 @@ Contextual Background: Offer any relevant context that might influence the under
 Outcome and Resolution: Highlight any conclusions reached or solutions proposed during the exchanges.
 Ensure that the summary is clear, structured, and devoid of redundant information, providing a concise yet thorough overview of the dialogue exchanges.""",
         temperature=0.1,
-        max_tokens=100,
+        max_tokens=300,
         n=1,
         stop=None
     #     top_p=1.0,
