@@ -1,4 +1,4 @@
-CareTalk AI - Your AI Mental Healthcare Assistant
+**CareTalk AI - Your AI Mental Healthcare Assistant**
 
 Mental health is a critical aspect of overall well-being, influencing our emotional,
 psychological, and social stability. Despite its significance, accessing mental health
